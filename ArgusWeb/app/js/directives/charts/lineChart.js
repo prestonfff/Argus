@@ -463,7 +463,8 @@ angular.module('argus.directives.charts.lineChart', [])
 
                 if(isBrushInNonEmptyRange()) {
                     currSeries.forEach(function (metric, index) {
-                        if (metric.data.length === 0 || !scope.sources[index].displaying) {
+                        if (metric.data.length === 0) {
+                           //todo figure out why adding !scope.sources[index].displaying is causing trouble
                             return;
                         }
                         var data = metric.data;
