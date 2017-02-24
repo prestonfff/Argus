@@ -50,23 +50,28 @@ angular.module('argus.controllers.viewMetrics', ['ngResource'])
                             color: 'Maroon'
                         }];
                     }
-                    $scope.updateChart(tempSeries, annotationInfo);
+                    $scope.updateChart(tempSeries, annotationInfo, [$scope.expression]);
                     $scope.chartLoaded = true;
                 }, function (error) {
-                    growl.error(error.data.message, {referenceId: 'viewmetrics-error'});
+                    // prevent error.data.message being null breaks the message
+                    if (error.data.message === null) {
+                        error.data.message = "Something was wrong. No info.";
+                    } else {
+                       growl.error(error.data.message, {referenceId: 'viewmetrics-error'});
+                    }
                     tempSeries = [{
                         invalidMetric: true,
                         errorMessage: error.statusText + '(' + error.status + ') - ' + error.data.message.substring(0, 31),
                         name: error.config.params.expression,
                         color: 'Black'
                     }];
-                    $scope.updateChart(tempSeries, annotationInfo);
+                    $scope.updateChart(tempSeries, annotationInfo, []);
                     $scope.chartLoaded = true;
                 });
             } else {
                 // empty expression
                 $scope.checkMetricExpression();
-                $scope.updateChart(tempSeries, annotationInfo);
+                $scope.updateChart(tempSeries, annotationInfo, []);
                 $scope.chartLoaded = true;
             }
         };
@@ -96,14 +101,8 @@ angular.module('argus.controllers.viewMetrics', ['ngResource'])
 
             if(category) {
                 if(category === 'scope') {
-                    if(newParams['metric'] === '*') {
-                        newParams['limit'] = 10;
-                    }
                     newParams['scope'] = newParams['scope'] + '*';
                 } else if(category === 'metric') {
-                    if(newParams['scope'] === '*') {
-                        newParams['limit'] = 10;
-                    }
                     newParams['metric'] = newParams['metric'] + '*';
                 } else if(category === 'tagk') {
                     newParams['limit'] = 10;
@@ -201,11 +200,14 @@ angular.module('argus.controllers.viewMetrics', ['ngResource'])
 
         // -------------
 
-        $scope.updateChart = function (series, annotationInfo) {
+        $scope.updateChart = function (series, annotationInfo, expressions) {
             // if the metric expression is not empty
             if (series && series.length > 0) {
                 var chartScope = $scope.$new(false);
-                chartScope.chartConfig = {chartId: 'container'};
+                chartScope.chartConfig = {
+                    chartId: 'container',
+                    expressions: expressions
+                };
                 chartScope.dateConfig = {};
                 chartScope.series = series;
 
@@ -230,7 +232,6 @@ angular.module('argus.controllers.viewMetrics', ['ngResource'])
                 if (annotationInfo.length > 0) {
                     var annotationCount = {};
                     annotationCount.tot = annotationInfo.length;
-                    //TODO: annotation does not work in the directive
                     for (var i = 0; i < annotationInfo.length; i++) {
                         Annotations.query({expression: annotationInfo[i]}).$promise.then(function (data) {
                             //prevent empty annotation returns
