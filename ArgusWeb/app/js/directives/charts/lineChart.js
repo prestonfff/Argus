@@ -1346,6 +1346,7 @@ angular.module('argus.directives.charts.lineChart', [])
                 adjustSeries();
                 reScaleY()
                 redraw();
+                updateStorage();
             }
 
             function downSample(series){
