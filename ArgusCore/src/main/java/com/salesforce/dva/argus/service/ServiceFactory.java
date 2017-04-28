@@ -87,7 +87,8 @@ public final class ServiceFactory {
     Provider<DiscoveryService> _discoveryServiceProvider;
     @Inject
     Provider<BatchService> _batchServiceProvider;
-
+    @Inject
+    Provider<PreferenceService> _preferenceServiceProvider;
 
     //~ Methods **************************************************************************************************************************************
 
@@ -288,5 +289,14 @@ public final class ServiceFactory {
     public synchronized BatchService getBatchService() {
         return _batchServiceProvider.get();
     }
+    
+    /**
+     * Returns an instance of the Preference Service
+     * 
+     * @return An instance of the Preference Service
+     */
+    public synchronized PreferenceService getPreferenceService() {
+		return _preferenceServiceProvider.get();
+	}
 }
 /* Copyright (c) 2016, Salesforce.com, Inc.  All rights reserved. */
